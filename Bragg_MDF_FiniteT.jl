@@ -197,14 +197,14 @@ end
 L::Int64 = 1000
 
 ### pre quench ###
-E::Vector{Float64} = eigvals(FreeHamiltonian(L,1.0,0.1,true))
-U::Matrix{Float64} = eigvecs(FreeHamiltonian(L,1.0,0.1,true))
-# E::Vector{Float64} = eigvals(TrapHamiltonian(L,1.0,0.1,2e-5,false))
-# U::Matrix{Float64} = eigvecs(TrapHamiltonian(L,1.0,0.1,2e-5,false))
+E2::Vector{Float64} = eigvals(FreeHamiltonian(L,1.0,0.1,false))
+U2::Matrix{Float64} = eigvecs(FreeHamiltonian(L,1.0,0.1,false))
+E::Vector{Float64} = eigvals(TrapHamiltonian(L,1.0,0.1,2e-5,false))
+U::Matrix{Float64} = eigvecs(TrapHamiltonian(L,1.0,0.1,2e-5,false))
 
 ### post quench ###
-E2::Vector{Float64} = eigvals(BraggHamiltonian(L,1.0,0.1,0.0,20,pi/4,true))
-U2::Matrix{Float64} = eigvecs(BraggHamiltonian(L,1.0,0.1,0.0,20,pi/4,true))
+# E2::Vector{Float64} = eigvals(BraggHamiltonian(L,1.0,0.1,0.0,20,pi/4,true))
+# U2::Matrix{Float64} = eigvecs(BraggHamiltonian(L,1.0,0.1,0.0,20,pi/4,true))
 sites::Array{Float64,1} = range(0,L-1,length=L);
 
 
@@ -214,15 +214,15 @@ sites::Array{Float64,1} = range(0,L-1,length=L);
 #####################
 tpulse::Float64 = 0.1;
 Np::Int64 = 31;
-Temps::Array{Float64} = [2.0,10.0,100.0]
+Temps::Array{Float64} = [2.0,100.0]
 for beta in Temps
     @time mu::Float64 = GetChemicalPotential(L, beta, Np, U, E)
     @time C::Matrix{Float64} = NCorrFiniteT(L, beta, U, E, mu)
-    @time p_pulse::Matrix{Float64} = real(pij(tpulse,U2,E2,C));
-    for t in range(0,50,2)
-        p::Matrix{Float64} = real(pij(t,U,E,p_pulse));
+    # @time p_pulse::Matrix{Float64} = real(pij(tpulse,U2,E2,C));
+    for t in range(0,500,5)
+        p::Matrix{Float64} = real(pij(t,U2,E2,C));
         @time n::Vector{Float64} = real([nkt(q,L,p,sites) for q in range(0,pi,501)]);
-        open(string("Bragg_quench/n_free_L=1000_N=31_t=",t,"T=",beta,".bin"),"w") do f
+        open(string("FreeExpansionFiniteT/n_trap_OBC_L=1000_N=31_t=",t,"T=",beta,".bin"),"w") do f
             write(f,n)
         end
         println(string("t=",t," done!"))
